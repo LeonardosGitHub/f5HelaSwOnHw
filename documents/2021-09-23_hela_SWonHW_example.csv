@@ -1,0 +1,5 @@
+Date,Device Name,Version,Build,Hardware Type,RegKey,Serial#,ltm,asm,gtm,sslo,vcmp,avr,afm,apm,cgnat,dos,fps,ilx,lc,pem,swg,tam,urldb
+2021-09-23,ip-192-168-1-200.example.com,15.1.2.1,0.0.10,Z100/a_/pc,WWWWW-BBBBB-CCCCC-DDDDD-EEEEE,abc-def,dedicated,none,none,none,,none,none,none,none,none,none,none,none,none,none,,none
+2021-09-23,ip-192-168-1-43.example.com,15.1.2.1,0.0.10,Z100/a_/pc,AAAAA-BBBBB-XXXXX-DDDDD-EEEEE,abc-ghi,nominal,nominal,nominal,none,,nominal,none,none,none,none,none,none,none,none,none,,none
+2021-09-23,ip-192-168-1-254.example.com,15.1.2.1,0.0.10,Z100/a_/pc,AAAAA-BBBBB-CCCCC-YYYYY-EEEEE,abc-jkl,nominal,nominal,none,none,,none,nominal,none,none,none,none,none,none,none,none,,none
+2021-09-23,ip-192-168-1-71.example.com,15.1.2.1,0.0.10,Z100/a_/pc,AAAAA-BBBBB-CCCCC-DDDDD-ZZZZZ,abc-mno,nominal,none,none,none,,nominal,nominal,none,none,none,none,none,none,none,none,,none

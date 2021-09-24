@@ -1,0 +1,79 @@
+    - name: Get version and build of software running on BIG-IP
+      uri:
+        url: https://{{item}}:{{port}}{{uris.version}}
+        method: GET
+        user: "{{user}}"
+        password: "{{password}}"
+        validate_certs: no
+      delegate_to: localhost
+      register: outputVersionBigip
+
+    - name: Setting variable for version of software running on BIG-IP
+      set_fact:
+        bigipInfo: "{{ bigipInfo | combine(outputVersionBigip | json_query(query_json)) }}"
+      vars:
+        query_json: >
+          {"versionBigIP": json.entries."https://localhost/mgmt/tm/sys/version/0".nestedStats.entries.Version.description, "buildBigIP": json.entries."https://localhost/mgmt/tm/sys/version/0".nestedStats.entries.Build.description}
+    
+    - name: Get hostname of BIG-IP
+      uri:
+        url: https://{{item}}:{{port}}{{uris.hostname}}
+        method: GET
+        user: "{{user}}"
+        password: "{{password}}"
+        validate_certs: no
+      delegate_to: localhost
+      register: outputHostnameBigip
+
+    - name: Setting variable for hostname of BIG-IP
+      set_fact:
+        bigipInfo: "{{ bigipInfo | combine(outputHostnameBigip | json_query(query_json)) }}"
+      vars:
+        query_json: >
+          {"hostnameBigIP": json.hostname}
+
+    - name: Get BIG-IP type of hardware i.e. i10800, i5800, etc.
+      uri:
+        url: https://{{item}}:{{port}}{{uris.license}}
+        method: GET
+        user: "{{user}}"
+        password: "{{password}}"
+        validate_certs: no
+      delegate_to: localhost
+      register: outputHardwareBigip
+
+    - name: Setting variable for type of hardware BIG-IP
+      set_fact:
+        bigipInfo: "{{ bigipInfo | combine(outputHardwareBigip | json_query(query_json)) }}"
+      vars:
+        query_json: >
+          {"hardwareBigIP": json.entries."https://localhost/mgmt/tm/sys/license/0".nestedStats.entries.platformId.description, "regKeyBigIP": json.entries."https://localhost/mgmt/tm/sys/license/0".nestedStats.entries.registrationKey.description, "serialNumBigIP": json.entries."https://localhost/mgmt/tm/sys/license/0".nestedStats.entries.applianceSerialNumber.description}
+
+    - name: Get resource provisioning of all modules on BIG-IP
+      uri:
+        url: https://{{item}}:{{port}}{{uris.resourceProv}}
+        method: GET
+        user: "{{user}}"
+        password: "{{password}}"
+        validate_certs: no
+      delegate_to: localhost
+      register: outputResourceprovBigip
+
+    - name: Setting variable to manipulate on playbook
+      set_fact:
+        resourceProv: "{{outputResourceprovBigip | json_query(query_json)}}"
+      vars:
+        query_json: >
+          {"resources": json.items[*]}
+
+    - name: Loop through resources and add them to bigipInfo variable
+      set_fact:
+        bigipInfo: "{{  bigipInfo | combine({item: resourceProv | json_query(query_json)}) }}"
+      vars:
+        query_json: >
+          resources[?name == '{{item}}'].level | [0]
+      loop: "{{ modules }}"
+    
+    - name: "Write BIG-IP information to .csv File"
+      shell: echo {{todayDate}},{{bigipInfo.hostnameBigIP}},{{bigipInfo.versionBigIP}},{{bigipInfo.buildBigIP}},{{bigipInfo.hardwareBigIP}},{{bigipInfo.regKeyBigIP}},{{bigipInfo.serialNumBigIP}},{{bigipInfo.ltm}},{{bigipInfo.asm}},{{bigipInfo.gtm}},{{bigipInfo.sslo}},{{bigipInfo.vcmp}},{{bigipInfo.avr}},{{bigipInfo.afm}},{{bigipInfo.apm}},{{bigipInfo.cgnat}},{{bigipInfo.dos}},{{bigipInfo.fps}},{{bigipInfo.ilx}},{{bigipInfo.lc}},{{bigipInfo.pem}},{{bigipInfo.swg}},{{bigipInfo.tam}},{{bigipInfo.urldb}} >> ../documents/{{todayDate}}_hela_SWonHW.csv
+      delegate_to: localhost

@@ -1,0 +1,47 @@
+---
+- name: HELA Software on Hardware reporting
+
+  hosts: localhost
+  gather_facts: yes
+  vars_files:
+    - ../vault/vault.yml
+    - ../listOfDevices/bigipListOfDevices.yml
+  vars:
+    port: 8443
+    todayDate: "{{ansible_date_time.date}}"
+    bigipInfo: {}
+    uris:
+      version:      /mgmt/tm/sys/version
+      hostname:     /mgmt/tm/sys/global-settings?$select=hostname
+      license:      /mgmt/tm/sys/license
+      resourceProv: /mgmt/tm/sys/provision?$select=name,level
+    modules:
+      - afm
+      - apm
+      - asm
+      - avr
+      - cgnat
+      - dos
+      - fps
+      - gtm
+      - ilx
+      - lc
+      - ltm
+      - pem
+      - sslo
+      - swg
+      - tam
+      - urldb
+      - vcmp
+
+  tasks:
+
+  - name: "Write Headers to .csv File"
+    shell: echo 'Date,Device Name,Version,Build,Hardware Type,RegKey,Serial#,ltm,asm,gtm,sslo,vcmp,avr,afm,apm,cgnat,dos,fps,ilx,lc,pem,swg,tam,urldb' >../documents/{{todayDate}}_hela_SWonHW.csv
+    delegate_to: localhost
+
+  - name: Get BIG-IP information, looping through BIG-IP list
+    include_tasks: helaSWonHW_perDevice.yml
+    loop: "{{bigipList}}"
+
+

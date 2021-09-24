@@ -1,0 +1,6 @@
+bigipList:
+  - 3.22.175.232
+  - 3.139.68.119
+  - 18.118.111.60
+  - 3.16.128.142
+  #Add list of all devices either IP address or FQDN
